@@ -63,7 +63,7 @@ class Users(db.Model):
     user_chat_member = db.relationship('Chat', secondary=chat_members,
                                        backref=db.backref('chat_join', lazy='dynamic'))
 
-    user_messages = db.relationship('Message', backref='user_message_owner')
+    user_messages = db.relationship('Message', backref='user')
 
     #followers = db.relationship('Users', secondary=friends,
      #                           backref=db.backref('subscribe', lazy='dynamic'))
@@ -87,9 +87,11 @@ class Message(db.Model):
     sentby = db.Column(db.Integer, db.ForeignKey('users.id'))
     chat = db.Column(db.Integer, db.ForeignKey('chat.id'))
 
-    def __init__(self, text, time=func.now()):
+    def __init__(self, text, time=func.now(), sentby=None, chat=None):
         self.text=text
         self.time=time
+        self.sentby = sentby
+        self.chat = chat
 
 
 class Chat(db.Model):
@@ -98,7 +100,7 @@ class Chat(db.Model):
     title = db.Column(db.VARCHAR(80), nullable=False)
     avatar = db.Column(db.VARCHAR(100))
 
-    chat_messages = db.relationship('Message', backref='chat_message_owner')
+    chat_messages = db.relationship('Message', backref='chat')
 
     def __init__(self, type, title,
                  avatar=None):
@@ -146,94 +148,104 @@ class Roles(db.Model):
         self.title=title
 
 
-class Check:
+class Pair:
     @staticmethod
-    def public_subscribers_checking(UserObject, PublicObject):
-        #user = Users(nick='nagibator228', avatar='', descr='dodik', password=12345,
-        #     name='Martin', surname='Iden')
-        #public = Public(title='dqrq', avatar='fqt', description='qwtwqtqt')
-        try:
-            db.session.add(UserObject)                                                              #можно использовать db.session.add_all([public, user])
-            db.session.add(PublicObject)
-            PublicObject.subscribers.append(UserObject)
-            db.session.commit()
-        except ValueError:
-            print("FAIL")
-        else:
-            return True
+    def public_subscribers(user_id, public_id):
+        user = Operations.return_row("users", id=user_id)
+        public = Operations.return_row("public", id=public_id)
+
+        if user is None:
+            raise ValueError('Пользователя с таким id не существует!')
+
+        if public is None:
+            raise ValueError('Паблика с таким id не существует!')
+
+
+        public.subscribers.append(user)
+        db.session.commit()
+
+        return True
+
 
     @staticmethod
-    def user_post_published_checking(UserObject, PostObject):
-        #user = Users(nick='na132', avatar='rqwtq', descr='dok', password=125,
-        #         name='Fidel', surname='Castro')
-        #post = Post(text='Cuba is free!')
-        try:
-            db.session.add(UserObject)
-            db.session.add(PostObject)
-            PostObject.published.append(UserObject)
-            db.session.commit()
-        except ValueError:
-            print("FAIL")
-        else:
-            return True
+    def user_post_published(user_id, post_id):
+        user = Operations.return_row("users", id=user_id)
+        post = Operations.return_row("post", id=post_id)
+
+        if user is None:
+            raise ValueError('Пользователя с таким id не существует!')
+
+        if post is None:
+            raise ValueError('Поста с таким id не существует!')
+
+        post.published.append(user)
+        db.session.commit()
+
+        return True
 
     @staticmethod
-    def public_post_published_checking(PublicObject, PostObject):
-        #public = Public(title='d123')
-        #post = Post(text='Hello!')
-        try:
-            db.session.add(PublicObject)
-            db.session.add(PostObject)
-            PostObject.pub_published.append(PublicObject)
-            db.session.commit()
-        except ValueError:
-            print("FAIL")
-        else:
-            return True
+    def public_post_published(post_id, public_id):
+
+        post = Operations.return_row("post", id=post_id)
+        public = Operations.return_row("public", id=public_id)
+
+        if post is None:
+            raise ValueError('Поста с таким id не существует!')
+
+        if public is None:
+            raise ValueError('Паблика с таким id не существует!')
+
+        post.pub_published.append(public)
+        db.session.commit()
+
+        return True
 
     @staticmethod
-    def user_chat_member_checking(UserObject, ChatObject):
-        try:
-            #user = Users(nick='VasilyPupkin', avatar='rqwqq', descr='Vasily', password=1225,
-            #         name='Vasily', surname='Pupkin')
-            #chat = Chat(type='dialog', title='basedata')
-            db.session.add(UserObject)
-            db.session.add(ChatObject)
-            ChatObject.chat_join.append(UserObject)
-            db.session.commit()
-        except ValueError:
-            print("FAIL")
-        else:
-            return True
+    def user_chat_member(user_id, chat_id):
+
+        user = Operations.return_row("users", id=user_id)
+        chat = Operations.return_row("chat", id=chat_id)
+
+        if user is None:
+            raise ValueError('Пользователя с таким id не существует!')
+
+        if chat is None:
+            raise ValueError('Чата с таким id не существует!')
+
+
+        chat.chat_join.append(user)
+        db.session.commit()
+
+        return True
 
     @staticmethod
-    def user2message_checking(UserObject, MessageObject):
-        #user = Users(nick='DonaldTrump', avatar='rqdwwqq', descr='America', password=1225,
-        #             name='Hi', surname='Clinton')
-        #message = Message(text='America began operations in Russia!',
-        #                  user_message_owner=user)
-        try:
-            db.session.add(UserObject)
-            db.session.add(MessageObject)
-            db.session.commit()
-        except ValueError:
-            print("FAIL")
-        else:
-            return True
+    def user2message(user_id, message_text):
+
+        user = Operations.return_row("users", id=user_id)
+        if user is None:
+            raise ValueError('Чата с таким id не существует!')
+        message = Message(text=message_text, sentby=user)
+
+        db.session.add(message)
+        db.session.commit()
+
+        return True
 
     @staticmethod
-    def chat2message_checking(ChatObject, MessageObject):
-        try:
-            #chat = Chat(type='dialog', title='next')
-            #message = Message(text='Hi, boys!',
-            #              chat_message_owner=chat)
-            db.session.add(ChatObject)
-            db.session.add(MessageObject)
-            db.session.commit()
-        except ValueError:
-            print("FAIL")
-        else:
-            return True
+    def chat2message(chat_id, message_text):
+
+        chat = Operations.return_row("chat", id=chat_id)
+        if chat is None:
+            raise ValueError('Чата с таким id не существует!')
+
+        message = Message(text=message_text,
+                          chat=chat)
+
+        db.session.add(message)
+        db.session.commit()
+
+        return True
+
 
 
     #def friends_checking():
@@ -263,7 +275,7 @@ class Operations:
 
     @staticmethod
     def return_row(ClassName, id):
-        tables[ClassName].query.filter_by(id=id).first()
+        return tables[ClassName].query.filter_by(id=id).first()
 
     @classmethod
     def return_table(self, ClassName):
@@ -326,12 +338,9 @@ def main():  #Кто опять будет тупить и не запустит
     db.create_all()
 
 
-    Operations.appending('users', 'StevenG', 'qwrqr', 'fqwrtqw', 12441,
-                         'Steven', 'Gerrard')
 
-    result = Operations.filter(ClassName='users', column='name',
-                               value='Steven')
+    Pair.public_subscribers(user_id=14, public_id=2)
 
-    for el in result:
-        print(el.id, el.nick)
+
+
 

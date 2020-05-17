@@ -3,6 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="4b61ce6c-57b3-4390-9ae0-d265c9de9ca4" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -26,6 +27,7 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
+        <option value="Jupyter Notebook" />
         <option value="Python Script" />
       </list>
     </option>
@@ -33,6 +35,7 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="JupyterTrust" id="e28d818e-3dc2-4855-a138-d0c9e170a581" />
   <component name="ProjectId" id="1bU1lfEtpcTcXYshM4ZzzuwNKH3" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
@@ -118,9 +121,32 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="main_2" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="SQL" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/main_2.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <recent_temporary>
       <list>
         <item itemvalue="Python.main" />
+        <item itemvalue="Python.main_2" />
         <item itemvalue="Python.User" />
         <item itemvalue="Python.alchemy" />
       </list>
@@ -151,6 +177,10 @@
       <workItem from="1588672037136" duration="6592000" />
       <workItem from="1588775625667" duration="34364000" />
       <workItem from="1589017051212" duration="6542000" />
+      <workItem from="1589657376349" duration="325000" />
+      <workItem from="1589659411394" duration="1196000" />
+      <workItem from="1589716986801" duration="1892000" />
+      <workItem from="1589720529697" duration="1176000" />
     </task>
     <servers />
   </component>
@@ -158,46 +188,49 @@
     <option name="version" value="1" />
   </component>
   <component name="WindowStateProjectService">
-    <state width="1807" height="213" key="GridCell.Tab.0.bottom" timestamp="1589023376811">
+    <state width="1807" height="212" key="GridCell.Tab.0.bottom" timestamp="1589721673706">
       <screen x="67" y="27" width="1853" height="948" />
     </state>
     <state width="992" height="216" key="GridCell.Tab.0.bottom/67.27.1038.948@67.27.1038.948" timestamp="1588849030942" />
     <state width="1003" height="308" key="GridCell.Tab.0.bottom/67.27.1049.709@67.27.1049.709" timestamp="1588675434363" />
-    <state width="1807" height="213" key="GridCell.Tab.0.bottom/67.27.1853.948@67.27.1853.948" timestamp="1589023376811" />
+    <state width="1807" height="212" key="GridCell.Tab.0.bottom/67.27.1853.948@67.27.1853.948" timestamp="1589721673706" />
     <state width="841" height="244" key="GridCell.Tab.0.bottom/67.27.887.624@67.27.887.624" timestamp="1588673815537" />
-    <state width="1807" height="213" key="GridCell.Tab.0.center" timestamp="1589023376809">
+    <state width="1807" height="212" key="GridCell.Tab.0.center" timestamp="1589721673704">
       <screen x="67" y="27" width="1853" height="948" />
     </state>
     <state width="992" height="216" key="GridCell.Tab.0.center/67.27.1038.948@67.27.1038.948" timestamp="1588849030940" />
     <state width="1003" height="308" key="GridCell.Tab.0.center/67.27.1049.709@67.27.1049.709" timestamp="1588675434361" />
-    <state width="1807" height="213" key="GridCell.Tab.0.center/67.27.1853.948@67.27.1853.948" timestamp="1589023376809" />
+    <state width="1807" height="212" key="GridCell.Tab.0.center/67.27.1853.948@67.27.1853.948" timestamp="1589721673704" />
     <state width="841" height="244" key="GridCell.Tab.0.center/67.27.887.624@67.27.887.624" timestamp="1588673815535" />
-    <state width="1807" height="213" key="GridCell.Tab.0.left" timestamp="1589023376808">
+    <state width="1807" height="212" key="GridCell.Tab.0.left" timestamp="1589721673703">
       <screen x="67" y="27" width="1853" height="948" />
     </state>
     <state width="992" height="216" key="GridCell.Tab.0.left/67.27.1038.948@67.27.1038.948" timestamp="1588849030939" />
     <state width="1003" height="308" key="GridCell.Tab.0.left/67.27.1049.709@67.27.1049.709" timestamp="1588675434361" />
-    <state width="1807" height="213" key="GridCell.Tab.0.left/67.27.1853.948@67.27.1853.948" timestamp="1589023376808" />
+    <state width="1807" height="212" key="GridCell.Tab.0.left/67.27.1853.948@67.27.1853.948" timestamp="1589721673703" />
     <state width="841" height="244" key="GridCell.Tab.0.left/67.27.887.624@67.27.887.624" timestamp="1588673815533" />
-    <state width="1807" height="213" key="GridCell.Tab.0.right" timestamp="1589023376810">
+    <state width="1807" height="212" key="GridCell.Tab.0.right" timestamp="1589721673705">
       <screen x="67" y="27" width="1853" height="948" />
     </state>
     <state width="992" height="216" key="GridCell.Tab.0.right/67.27.1038.948@67.27.1038.948" timestamp="1588849030941" />
     <state width="1003" height="308" key="GridCell.Tab.0.right/67.27.1049.709@67.27.1049.709" timestamp="1588675434362" />
-    <state width="1807" height="213" key="GridCell.Tab.0.right/67.27.1853.948@67.27.1853.948" timestamp="1589023376810" />
+    <state width="1807" height="212" key="GridCell.Tab.0.right/67.27.1853.948@67.27.1853.948" timestamp="1589721673705" />
     <state width="841" height="244" key="GridCell.Tab.0.right/67.27.887.624@67.27.887.624" timestamp="1588673815536" />
     <state x="67" y="27" width="969" height="688" key="SettingsEditor" timestamp="1588672178375">
       <screen x="67" y="27" width="979" height="688" />
     </state>
     <state x="67" y="27" width="969" height="688" key="SettingsEditor/67.27.979.688@67.27.979.688" timestamp="1588672178375" />
-    <state x="649" y="327" key="com.intellij.ide.util.TipDialog" timestamp="1589214359922">
-      <screen x="67" y="27" width="1853" height="948" />
+    <state x="67" y="225" key="com.intellij.ide.util.TipDialog" timestamp="1589720529896">
+      <screen x="67" y="27" width="1044" height="630" />
     </state>
-    <state x="649" y="327" key="com.intellij.ide.util.TipDialog/67.27.1853.948@67.27.1853.948" timestamp="1589214359922" />
+    <state x="67" y="225" key="com.intellij.ide.util.TipDialog/67.27.1044.630@67.27.1044.630" timestamp="1589720529896" />
+    <state x="649" y="327" key="com.intellij.ide.util.TipDialog/67.27.1853.948@67.27.1853.948" timestamp="1589659413998" />
+    <state x="67" y="185" key="com.intellij.ide.util.TipDialog/67.27.653.503@67.27.653.503" timestamp="1589717017451" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/SQL$main_2.coverage" NAME="main_2 Coverage Results" MODIFIED="1589660058641" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/SQL$User.coverage" NAME="User Coverage Results" MODIFIED="1588837390155" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/SQL$main.coverage" NAME="main Coverage Results" MODIFIED="1589023334130" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/SQL$main.coverage" NAME="main Coverage Results" MODIFIED="1589721673627" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/SQL$alchemy.coverage" NAME="alchemy Coverage Results" MODIFIED="1588785499448" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>
