@@ -1,158 +1,25 @@
 from sqlalchemy.sql import func
-from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy_filters import apply_filters
+from flask_marshmallow import Marshmallow
+from flask import Flask
+from flask import Flask, jsonify, request
+from sqlalchemy.sql import func
+from flask_cors import CORS
 
 
-def db_connection(user, password, psql_url, psql_db):                                       #Индивидуально для каждого
-    db_url = 'postgresql://{user}:{pw}@{url}/{db}'.format(user=user, pw=password,           #Пример: postgresql://scott:tiger@localhost/mydatabase
-                                                          url=psql_url, db=psql_db)         # (база данных уже должна быть создана)
-    return db_url                                                                           # (У меня Ubuntu, для Винды может быть другой способ подключения)
-
-
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = db_connection(user='postgres', password='2423',
-                                                      psql_url='dvv2423.fvds.ru', psql_db='social_network_2')
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False           # silence the deprecation warning
-
-db = SQLAlchemy(app)
-
-
-public_subscribers = db.Table('PublicSubscribers',                    #работает без ролей
-    db.Column('pub_id', db.Integer, db.ForeignKey('public.id')),
-    db.Column('u_id', db.Integer, db.ForeignKey('users.id')),
-    db.Column('ps_role', db.Integer, db.ForeignKey('roles.id'))
-)
-
-post_published_by_user = db.Table('PostPublishedByUser',                  #работает
-    db.Column('pub_id', db.Integer, db.ForeignKey('post.id')),
-    db.Column('pu_id', db.Integer, db.ForeignKey('users.id'))
-)
-
-post_published_by_public = db.Table('PostPublishedByPublic',                  #работает
-    db.Column('pub_id', db.Integer, db.ForeignKey('post.id')),
-    db.Column('pu_id', db.Integer, db.ForeignKey('public.id'))
-)
-
-chat_members = db.Table('ChatMembers',                                      #работает без ролей
-    db.Column('chat', db.Integer, db.ForeignKey('chat.id')),
-    db.Column('member', db.Integer, db.ForeignKey('users.id'))
-)
-
-#friends = db.Table('Friends',                                          не работает
-#    db.Column('id_1', db.Integer, db.ForeignKey('users.id')),
-#    db.Column('id_2', db.Integer, db.ForeignKey('users.id'))
-#)
-
-
-class Users(db.Model):
-    id = db.Column(db.INTEGER, primary_key=True)
-    nick = db.Column(db.VARCHAR(50), nullable=False)
-    avatar = db.Column(db.VARCHAR(200))
-    descr = db.Column(db.VARCHAR(500))
-    password = db.Column(db.VARCHAR(50), nullable=False)
-    name = db.Column(db.VARCHAR(50))
-    surname = db.Column(db.VARCHAR(50))
-
-    subscriptions = db.relationship('Public', secondary=public_subscribers,
-                                    backref=db.backref('subscribers', lazy='dynamic'))
-
-    user_post_published = db.relationship('Post', secondary=post_published_by_user,
-                                          backref=db.backref('published', lazy='dynamic'))
-
-    user_chat_member = db.relationship('Chat', secondary=chat_members,
-                                       backref=db.backref('chat_join', lazy='dynamic'))
-
-    user_messages = db.relationship('Message', backref='user')
-
-    #followers = db.relationship('Users', secondary=friends,
-     #                           backref=db.backref('subscribe', lazy='dynamic'))
-
-    def __init__(self, nick, avatar,
-                 descr, password, name,
-                 surname):
-
-        self.nick = nick
-        self.avatar = avatar
-        self.descr = descr
-        self.password = password
-        self.name = name
-        self.surname = surname
-
-
-class Message(db.Model):
-    id = db.Column(db.INTEGER, primary_key=True)
-    time = db.Column(db.DATE, default=func.now(), nullable=False)
-    text = db.Column(db.VARCHAR(1000), nullable=False)
-    sentby = db.Column(db.Integer, db.ForeignKey('users.id'))
-    chat = db.Column(db.Integer, db.ForeignKey('chat.id'))
-
-    def __init__(self, text, time=func.now(), sentby=None, chat=None):
-        self.text=text
-        self.time=time
-        self.sentby = sentby
-        self.chat = chat
-
-
-class Chat(db.Model):
-    id = db.Column(db.INTEGER, primary_key=True)
-    type = db.Column(db.VARCHAR(12), nullable=False)
-    title = db.Column(db.VARCHAR(80), nullable=False)
-    avatar = db.Column(db.VARCHAR(100))
-
-    chat_messages = db.relationship('Message', backref='chat')
-
-    def __init__(self, type, title,
-                 avatar=None):
-        self.type=type
-        self.title=title
-        self.avatar=avatar
-
-
-class Post(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    text = db.Column(db.VARCHAR(1000), nullable=False)
-    photo = db.Column(db.VARCHAR(200))
-    time = db.Column(db.DATE, default=func.now())
-    views = db.Column(db.NUMERIC(7), default=0, nullable=False)
-    likes = db.Column(db.NUMERIC(7), default=0, nullable=False)
-
-    def __init__(self, text, time=func.now(), photo=None,
-                 views=0, likes=0):
-        self.text = text
-        self.time=time
-        self.photo=photo
-        self.views=views
-        self.likes=likes
-
-
-class Public(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.VARCHAR(80), nullable=False)
-    avatar = db.Column(db.VARCHAR(100))
-    description = db.Column(db.VARCHAR(200))
-    post_published = db.relationship('Post', secondary=post_published_by_public,
-                                            backref=db.backref('pub_published', lazy='dynamic'))
-
-    def __init__(self, title, description=None, avatar=None):
-        self.title = title
-        self.description = description
-        self.avatar = avatar
-
-
-class Roles(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.VARCHAR(30), nullable=False)
-
-    def __init__(self, title):
-        self.title=title
 
 
 class Pair:
-    @staticmethod
-    def public_subscribers(user_id, public_id):
-        user = Operations.return_row("users", id=user_id)
-        public = Operations.return_row("public", id=public_id)
+
+    def __init__(self, db, tables, ops):
+        self.db = db
+        self.tables = tables
+        self.ops = ops
+
+    def public_subscribers(self, user_id, public_id):
+        user = self.ops.return_row("user", id=user_id)
+        public = self.ops.return_row("public", id=public_id)
 
         if user is None:
             raise ValueError('Пользователя с таким id не существует!')
@@ -162,15 +29,13 @@ class Pair:
 
 
         public.subscribers.append(user)
-        db.session.commit()
+        self.db.session.commit()
 
         return True
 
-
-    @staticmethod
-    def user_post_published(user_id, post_id):
-        user = Operations.return_row("users", id=user_id)
-        post = Operations.return_row("post", id=post_id)
+    def user_post_published(self, user_id, post_id):
+        user = self.ops.return_row("user", id=user_id)
+        post = self.ops.return_row("post", id=post_id)
 
         if user is None:
             raise ValueError('Пользователя с таким id не существует!')
@@ -179,15 +44,14 @@ class Pair:
             raise ValueError('Поста с таким id не существует!')
 
         post.published.append(user)
-        db.session.commit()
+        self.db.session.commit()
 
         return True
 
-    @staticmethod
-    def public_post_published(post_id, public_id):
+    def public_post_published(self, post_id, public_id):
 
-        post = Operations.return_row("post", id=post_id)
-        public = Operations.return_row("public", id=public_id)
+        post = self.ops.return_row("post", id=post_id)
+        public = self.ops.return_row("public", id=public_id)
 
         if post is None:
             raise ValueError('Поста с таким id не существует!')
@@ -196,15 +60,14 @@ class Pair:
             raise ValueError('Паблика с таким id не существует!')
 
         post.pub_published.append(public)
-        db.session.commit()
+        self.db.session.commit()
 
         return True
 
-    @staticmethod
-    def user_chat_member(user_id, chat_id):
+    def user_chat_member(self, user_id, chat_id):
 
-        user = Operations.return_row("users", id=user_id)
-        chat = Operations.return_row("chat", id=chat_id)
+        user = self.ops.return_row("user", id=user_id)
+        chat = self.ops.return_row("chat", id=chat_id)
 
         if user is None:
             raise ValueError('Пользователя с таким id не существует!')
@@ -214,109 +77,82 @@ class Pair:
 
 
         chat.chat_join.append(user)
-        db.session.commit()
+        self.db.session.commit()
 
         return True
 
-    @staticmethod
-    def user2message(user_id, message_text):
+    def user2message(self, user_id, message_text):
 
-        user = Operations.return_row("users", id=user_id)
+        user = self.ops.return_row("users", id=user_id)
         if user is None:
             raise ValueError('Чата с таким id не существует!')
-        message = Message(text=message_text, sentby=user)
+        message = self.db.Message(text=message_text, sentby=user)
 
-        db.session.add(message)
-        db.session.commit()
+        self.db.session.add(message)
+        self.db.session.commit()
 
         return True
 
-    @staticmethod
-    def chat2message(chat_id, message_text):
+    def chat2message(self, chat_id, message_text):
 
         chat = Operations.return_row("chat", id=chat_id)
         if chat is None:
             raise ValueError('Чата с таким id не существует!')
 
-        message = Message(text=message_text,
+        message = self.db.Message(text=message_text,
                           chat=chat)
 
-        db.session.add(message)
-        db.session.commit()
+        self.db.session.add(message)
+        self.db.session.commit()
 
         return True
 
 
 
-    #def friends_checking():
-    #   user1 = Users(nick='VasilyPupkin', avatar='rqwqq', descr='Vasily', password=1225,
-    #                 name='Vasily', surname='Pupkin')
-    #   user2 = Users(nick='DonaldTrump', avatar='rqdwwqq', descr='America', password=1225,
-    #                 name='Hi', surname='Clinton')
-
-    #    db.session.add(user1)
-    #   db.session.add(user2)
-    #  user1.subscribe.append(user2)
-    #  db.session.commit()
-
-
-tables = {'users': Users,
-          'message': Message,
-          'chat': Chat,
-          'post': Post,
-          'public': Public,
-          'roles': Roles}
-
-
 class Operations:
+    db = None
+    tables = None
 
-    def __init__(self):
-        pass
+    def return_row(self, ClassName, id):
+        return self.tables[ClassName].query.filter_by(id=id).first()
 
-    @staticmethod
-    def return_row(ClassName, id):
-        return tables[ClassName].query.filter_by(id=id).first()
-
-    @classmethod
     def return_table(self, ClassName):
-        return tables[ClassName].query.all()
+        return self.tables[ClassName].query.all()
 
-        #Пример:
-        #for el in return_table(Users):
+        # Пример:
+        # for el in return_table(Users):
         #   print(el.u_nick)
 
-    @staticmethod
-    def appending(ClassName, *args):
+    def appending(self, ClassName, *args):
         try:
-            element = tables[ClassName](*args)
+            element = self.tables[ClassName](*args)
         except TypeError:
-            raise("Wrong number of table parameters")
+            raise ("Wrong number of table parameters")
         else:
-            db.session.add(element)
-            db.session.commit()
+            self.db.session.add(element)
+            self.db.session.commit()
             return True
 
-
-    @classmethod
-    def remove(self, ClassName, id):      #удаление нашел только по id (оно почему-то не удаляет :( )
+    def remove(self, ClassName, id):  # удаление нашел только по id (оно почему-то не удаляет :( )
         try:
-            delete = tables[ClassName].query.filter_by(id=id).first()
+            delete = self.tables[ClassName].query.filter_by(id=id).first()
         except ValueError:
             raise ValueError('Либо такого id нет в базе, либо нет такого класса')
         else:
-            db.session.delete(delete)
-            db.session.commit()
+            self.db.session.delete(delete)
+            self.db.session.commit()
             return True
 
-    @staticmethod                                           #не работает
-    def update(ClassName, id, column_name, value):
+    def update(self, ClassName, id, column_name, value):
         try:
-            update = tables[ClassName].query.filter_by(id=id).first()
+            update = self.tables[ClassName].query.filter_by(id=id).first()
         except ValueError:
             raise ValueError('Либо такого id нет в базе, либо нет такого класса')
         else:
-            setattr(update, column_name, value)               #ClassName object is not subscripitable (можно обращаться к update только через точку, а не через [])
-            db.session.commit()
+            setattr(update, column_name,
+                    value)  # ClassName object is not subscripitable (можно обращаться к update только через точку,
+            # а не через [])
+            self.db.session.commit()
             return True
 
     @staticmethod
@@ -326,21 +162,244 @@ class Operations:
             Operations.remove(ClassName, row.id)
         return True
 
-    @staticmethod
-    def filter(ClassName, column, value, operation='=='):       #operation может быть не только '==', но и '<', '>'
-        query = db.session.query(tables[ClassName])
+    def filter(self, ClassName, column, value, operation='=='):  # operation может быть не только '==', но и '<', '>'
+        query = self.db.session.query(self.tables[ClassName])
         filter_spec = [{'field': column, 'op': operation, 'value': value}]
         result = apply_filters(query, filter_spec).all()
         return result
 
+    def __init__(self, database, table):
+        self.db = database
+        self.tables = table
 
-def main():  #Кто опять будет тупить и не запустит эту функцию перед запуском скрипта - тот здохнед
-    db.create_all()
+
+class Context:
+    def create_db(self):
+        self.db.create_all()
+
+    def __init__(self, application):
+        self.app = application
+        self.app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://{user}:{pw}@{url}/{db}'.format(user='postgres',
+                                                                                                  pw='2423',
+                                                                                                  url='dvv2423.fvds.ru',
+                                                                                                  db='social_network')
+        self.app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
+
+        self.db = SQLAlchemy(self.app)
+
+        self.ma = Marshmallow(self.app)
+
+        self.public_subscribers = self.db.Table('PublicSubscribers',  # работает без ролей
+                                                self.db.Column('pub_id', self.db.Integer,
+                                                               self.db.ForeignKey('public.id')),
+                                                self.db.Column('u_id', self.db.Integer, self.db.ForeignKey('users.id')),
+                                                self.db.Column('ps_role', self.db.Integer,
+                                                               self.db.ForeignKey('roles.id'))
+                                                )
+
+        self.post_published_by_user = self.db.Table('PostPublisheself.dbyUser',  # работает
+                                                    self.db.Column('pub_id', self.db.Integer,
+                                                                   self.db.ForeignKey('post.id')),
+                                                    self.db.Column('pu_id', self.db.Integer,
+                                                                   self.db.ForeignKey('users.id'))
+                                                    )
+
+        self.post_published_by_public = self.db.Table('PostPublisheself.dbyPublic',  # работает
+                                                      self.db.Column('pub_id', self.db.Integer,
+                                                                     self.db.ForeignKey('post.id')),
+                                                      self.db.Column('pu_id', self.db.Integer,
+                                                                     self.db.ForeignKey('public.id'))
+                                                      )
+
+        self.chat_members = self.db.Table('ChatMembers',  # работает без ролей
+                                          self.db.Column('chat', self.db.Integer, self.db.ForeignKey('chat.id')),
+                                          self.db.Column('member', self.db.Integer, self.db.ForeignKey('users.id')),
+                                          self.db.Column('role', self.db.Integer,
+                                                         self.db.ForeignKey('roles.id'))
+                                          )
+
+        class Friendship(self.db.Model):
+            __tablename__ = 'Friendship'
+            subscriber_id = self.db.Column(self.db.Integer, primary_key=True)
+            user_id = self.db.Column(self.db.Integer, self.db.ForeignKey('users.id'), primary_key=True)
+
+            def __init__(self, s_id, u_id):
+                self.subscriber_id = s_id
+                self.user_id = u_id
+
+        class FriendshipSchema(self.ma.Schema):
+            class Meta:
+                fields = ('subscriber_id', 'user_id')
+
+        self.friendship = Friendship
+        self.friendship_schema = FriendshipSchema()
+        self.friendships_schema = FriendshipSchema(many=True)
+
+        class Users(self.db.Model):
+            id = self.db.Column(self.db.INTEGER, primary_key=True)
+            nick = self.db.Column(self.db.VARCHAR(50), nullable=False)
+            avatar = self.db.Column(self.db.VARCHAR(200))
+            descr = self.db.Column(self.db.VARCHAR(500))
+            password = self.db.Column(self.db.VARCHAR(50), nullable=False)
+            name = self.db.Column(self.db.VARCHAR(50))
+            surname = self.db.Column(self.db.VARCHAR(50))
+
+            user_subscribers = self.db.relationship('Friendship')
+
+            subscriptions = self.db.relationship('Public', secondary=self.public_subscribers,
+                                                 backref=self.db.backref('subscribers', lazy='dynamic'))
+
+            user_post_published = self.db.relationship('Post', secondary=self.post_published_by_user,
+                                                       backref=self.db.backref('published', lazy='dynamic'))
+
+            user_chat_member = self.db.relationship('Chat', secondary=self.chat_members,
+                                                    backref=self.db.backref('chat_join', lazy='dynamic'))
+
+            user_messages = self.db.relationship('Message', backref='user_message_owner')
+
+            def __init__(self, nick, avatar,
+                         descr, password, name,
+                         surname):
+                self.nick = nick
+                self.avatar = avatar
+                self.descr = descr
+                self.password = password
+                self.name = name
+                self.surname = surname
+
+        class UserSchema(self.ma.Schema):
+            class Meta:
+                fields = ('id', 'nick', 'avatar', 'descr', 'password', 'name', 'surname')
+
+        self.user = Users
+        self.user_schema = UserSchema()
+        self.users_schema = UserSchema(many=True)
+
+        class Message(self.db.Model):
+            id = self.db.Column(self.db.INTEGER, primary_key=True)
+            time = self.db.Column(self.db.DATE, default=func.now(), nullable=False)
+            text = self.db.Column(self.db.VARCHAR(1000), nullable=False)
+            sentby = self.db.Column(self.db.Integer, self.db.ForeignKey('users.id'))
+            chat = self.db.Column(self.db.Integer, self.db.ForeignKey('chat.id'))
+
+            def __init__(self, text, time, sentby, chat):
+                self.text = text
+                self.time = time
+                self.sentby = sentby
+                self.chat = chat
+
+        class MessageSchema(self.ma.Schema):
+            class Meta:
+                fields = ('id', 'time', 'text', 'sentby', 'chat')
+
+        self.message = Message
+        self.message_schema = MessageSchema()
+        self.messages_schema = MessageSchema(many=True)
+
+        class Chat(self.db.Model):
+            id = self.db.Column(self.db.INTEGER, primary_key=True)
+            type = self.db.Column(self.db.VARCHAR(12), nullable=False)
+            title = self.db.Column(self.db.VARCHAR(80), nullable=False)
+            avatar = self.db.Column(self.db.VARCHAR(100))
+
+            chat_messages = self.db.relationship('Message', backref='chat_message_owner')
+
+            def __init__(self, type, title,
+                         avatar=None):
+                self.type = type
+                self.title = title
+                self.avatar = avatar
+
+        class ChatSchema(self.ma.Schema):
+            class Meta:
+                fields = ('id', 'type', 'title', 'avatar', 'count', 'members')
+
+        self.chat = Chat
+        self.chat_schema = ChatSchema()
+        self.chats_schema = ChatSchema(many=True)
+
+        class Post(self.db.Model):
+            id = self.db.Column(self.db.Integer, primary_key=True)
+            text = self.db.Column(self.db.VARCHAR(1000), nullable=False)
+            photo = self.db.Column(self.db.VARCHAR(200))
+            time = self.db.Column(self.db.DATE, default=func.now())
+            views = self.db.Column(self.db.NUMERIC(7), default=0, nullable=False)
+            likes = self.db.Column(self.db.NUMERIC(7), default=0, nullable=False)
+
+            def __init__(self, text, time=func.now(), photo=None,
+                         views=0, likes=0):
+                self.text = text
+                self.time = time
+                self.photo = photo
+                self.views = views
+                self.likes = likes
+
+        class PostSchema(self.ma.Schema):
+            class Meta:
+                fields = ('text', 'time', 'photo', 'views', 'likes')
+
+        self.post = Post
+        self.post_schema = PostSchema()
+        self.posts_schema = PostSchema(many=True)
+
+        class Public(self.db.Model):
+            id = self.db.Column(self.db.Integer, primary_key=True)
+            title = self.db.Column(self.db.VARCHAR(80), nullable=False)
+            avatar = self.db.Column(self.db.VARCHAR(100))
+            description = self.db.Column(self.db.VARCHAR(200))
+            post_published = self.db.relationship('Post', secondary=self.post_published_by_public,
+                                                  backref=self.db.backref('pub_published', lazy='dynamic'))
+
+            def __init__(self, title, description=None, avatar=None):
+                self.title = title
+                self.description = description
+                self.avatar = avatar
+
+        class PublicSchema(self.ma.Schema):
+            class Meta:
+                fields = ('id', 'title', 'avatar', 'description')
+
+        self.public = Public
+        self.public_schema = PublicSchema()
+        self.publics_schema = PublicSchema(many=True)
+
+        class Roles(self.db.Model):
+            id = self.db.Column(self.db.Integer, primary_key=True)
+            title = self.db.Column(self.db.VARCHAR(30), nullable=False)
+
+            def __init__(self, title):
+                self.title = title
+
+        class RolesSchema(self.ma.Schema):
+            class Meta:
+                fields = ('id', 'title')
+
+        self.roles = Roles
+        self.role_schema = RolesSchema()
+        self.roles_schema = RolesSchema(many=True)
+
+        self.tables = {'user': Users,
+                       'message': Message,
+                       'chat': Chat,
+                       'post': Post,
+                       'friendship': Friendship,
+                       'public': Public,
+                       'role': Roles}
+
+        self.ops = Operations(self.db, self.tables)
+        self.check = Pair(self.db, self.tables, ops=self.ops)
 
 
 
-    Pair.public_subscribers(user_id=14, public_id=2)
+def main():
+    app = Flask(__name__)
+    app.config['SECRET_KEY'] = 'mysupersecretkey'
+    cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 
+    context = Context(app)
+    context.create_db()
+
+    context.check.public_subscribers(user_id=3, public_id=2)
 
 
 
